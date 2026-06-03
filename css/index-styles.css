@@ -8,9 +8,3 @@ body {
     border-radius: 5px;
     margin: 30px;
 }
-
-button {
-    background-color: rgb(235, 174, 174)
-    button-radius: 5px;
-    button-border: 2px solid black;
-}
