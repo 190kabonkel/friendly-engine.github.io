@@ -1,0 +1,10 @@
+body {
+    background-color: rgb(177, 208, 219);
+}
+
+.Links {
+    color: rgb(201, 168, 5);
+    border: 2px solid rgb(15, 14, 14);
+    border-radius: 5px;
+    margin: 30px;
+}
