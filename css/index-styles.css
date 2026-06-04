@@ -14,3 +14,9 @@ body {
     height: 60px;
     background-color: #ffffff;
 }
+.logo {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 60px;   /* grootte */
+}
