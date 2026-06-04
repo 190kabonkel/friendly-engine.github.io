@@ -1,0 +1,12 @@
+--------------------------------------------------------begin voor doc
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>test</title>
+</head>
+</html>
+--------------------------------------------------------button
+<a href="docnaam.html">
+    <button>vinci debt</button>
+</a>
+--------------------------------------------------------
