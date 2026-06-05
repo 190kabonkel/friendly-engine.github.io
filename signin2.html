@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <style>
+        body {
+            background-color: rgb(177, 208, 219);
+            font-family: Arial, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            width: 100%;
+            font-size: 60px;
+            height: 60px;
+            background-color: #ffffff;
+            display: flex;
+            align-items: center;
+            padding-left: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin: 30px;
+            font-size: 32px;
+            color: rgb(15, 14, 14);
+        }
+
+        .button-link {
+            display: inline-block;
+            color: rgb(159, 14, 14);
+            border: 4px solid rgb(15, 14, 14);
+            border-radius: 5px;
+            margin: 30px;
+            padding: 6px 16px;
+            background: white;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .button-link:hover {
+            background-color: rgb(159, 14, 14);
+            color: white;
+        }
+
+        a > button {
+            color: rgb(159, 14, 14);
+            border: 4px solid rgb(15, 14, 14);
+            border-radius: 5px;
+            margin: 30px;
+            padding: 6px 16px;
+            background: white;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        a > button:hover {
+            background-color: rgb(159, 14, 14);
+            color: white;
+        }
+
+        form {
+            background: white;
+            border: 4px solid rgb(15, 14, 14);
+            border-radius: 8px;
+            display: inline-block;
+            padding: 24px 32px;
+            margin: 0 30px 20px 30px;
+        }
+
+        form label {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        form input[type="text"],
+        form input[type="password"] {
+            border: 2px solid rgb(15, 14, 14);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 14px;
+            margin-left: 6px;
+        }
+
+        form input[type="submit"] {
+            color: rgb(159, 14, 14);
+            border: 4px solid rgb(15, 14, 14);
+            border-radius: 5px;
+            background: white;
+            padding: 5px 18px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        form input[type="submit"]:hover {
+            background-color: rgb(159, 14, 14);
+            color: white;
+        }
+
+        img {
+            display: block;
+            margin: 0 30px 10px 30px;
+            max-width: 300px;
+            border: 4px solid rgb(15, 14, 14);
+            border-radius: 6px;
+        }
+
+        h4 {
+            margin: 0 30px;
+            font-size: 15px;
+            color: rgb(15, 14, 14);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="topbar"></div>
+
+    <a href="index.html" class="button-link">Exit</a>
+    <h1>Sign In</h1>
+
+    <form action="submit_signin.php" method="post" novalidate>
+        <label for="username">Username:</label>
+        <input type="text" id="username" placeholder="User" name="username" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" placeholder="VinciIsSigma123" name="password" required><br><br>
+        <label for="credit">Credit Card:</label>
+        <input type="text" id="credit" placeholder="1234-5678-9012-3456" name="credit" maxlength="19" required><br><br>
+        <input type="submit" value="Sign In">
+    </form>
+
+    <img src="./Images/e.png" alt="Screenshot">
+    <h4>if you do not sign up this monster will consume your soul</h4>
+
+    <script>
+        const credit = document.getElementById('credit');
+        credit.addEventListener('input', () => {
+            let v = credit.value.replace(/\D/g, '').substring(0, 16);
+            credit.value = v.replace(/(.{4})/g, '$1-').replace(/-$/, '');
+        });
+    </script>
+
+</body>
+</html>
