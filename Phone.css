@@ -1,0 +1,16 @@
+@font-face {
+    src: url(Images\Cardo-Italic.ttf);
+    font-family: 'Cardo';
+}
+
+
+#Info {
+    border:3px solid rgb(229, 187, 118);
+    border-radius:5px;
+    background-color:rgb(0, 0, 0);
+    padding:15px;
+    width:250px;
+    font-size:40px;
+    font-family: 'Cardo', serif;
+
+}
