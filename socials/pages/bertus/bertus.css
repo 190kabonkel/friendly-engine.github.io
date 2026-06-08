@@ -1,0 +1,65 @@
+:root{
+  --bg-1: #0f1724;
+  --bg-2: #0b1a2b;
+  --accent: #7c5cff;
+  --muted: #a9b2c7;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: linear-gradient(135deg,var(--bg-1),var(--bg-2));
+  color:#e6eef8;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+.page{
+  min-height:100vh;
+  display:flex;
+  gap:32px;
+  align-items:center;
+  justify-content:center;
+  padding:48px 20px;
+}
+
+.card{
+  width:100%;
+  max-width:480px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  border-radius:16px;
+  padding:28px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  backdrop-filter: blur(8px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.04);
+  text-align:center;
+}
+
+.avatar{
+  width:96px;height:96px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),#4dd0e1);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:40px;color:white;margin:0 auto 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+
+.name{margin:0;font-size:24px;letter-spacing:0.4px}
+.role{margin:6px 0 14px;color:var(--muted);font-size:14px}
+.bio{margin:0 0 18px;color:#dbe9ff;line-height:1.45}
+
+.links{display:flex;gap:12px;justify-content:center;margin-top:6px}
+.btn{display:inline-block;padding:10px 16px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#6ec6ff);color:#061226;text-decoration:none;font-weight:600}
+.btn.ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04)}
+
+.content{max-width:680px;color:var(--muted);font-size:15px;line-height:1.6}
+.content h2{color:#fff;margin-top:0}
+
+@media (max-width:880px){
+  .page{flex-direction:column;align-items:stretch;padding:32px}
+  .content{order:2}
+}
+
+/* small helper to keep layout tidy when embedded */
+body,p,a,h1,h2{word-break:break-word}
