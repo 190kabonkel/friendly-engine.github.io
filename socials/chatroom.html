@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatroom</title>
+</head>
+<body>
+
+<h2>Chatroom</h2>
+
+<div id="naam-sectie">
+  <label>Jouw naam: <input type="text" id="naam-input" maxlength="30"></label>
+  <button onclick="slaNaamOp()">Opslaan</button>
+</div>
+
+<br>
+
+<div id="chat-sectie" style="display:none">
+  <p>Ingelogd als: <strong id="huidige-naam"></strong> <button onclick="verwijderNaam()">Wijzig naam</button></p>
+
+  <div id="berichten" style="border:1px solid black; width:500px; height:300px; overflow-y:scroll; padding:5px; margin-bottom:5px;"></div>
+
+  <input type="text" id="bericht-input" placeholder="Typ een bericht..." style="width:400px" onkeydown="if(event.key==='Enter') stuurBericht()">
+  <button onclick="stuurBericht()">Verstuur</button>
+</div>
+
+<script>
+  const OPSLAG_BERICHTEN_KEY = 'chatroom_berichten';
+  const OPSLAG_NAAM_KEY = 'chatroom_naam';
+
+  let naam = '';
+  let pollingInterval = null;
+
+  function init() {
+    const opgeslagenNaam = localStorage.getItem(OPSLAG_NAAM_KEY);
+    if (opgeslagenNaam) {
+      naam = opgeslagenNaam;
+      toonChat();
+    }
+    laadBerichten();
+  }
+
+  function slaOp(naam) {
+    // Gebruik localStorage voor naam
+    // Gebruik window.storage (artifact API) voor gedeelde berichten
+  }
+
+  function slaNaamOp() {
+    const input = document.getElementById('naam-input').value.trim();
+    if (!input) { alert('Vul een naam in.'); return; }
+    naam = input;
+    localStorage.setItem(OPSLAG_NAAM_KEY, naam);
+    toonChat();
+  }
+
+  function verwijderNaam() {
+    localStorage.removeItem(OPSLAG_NAAM_KEY);
+    naam = '';
+    document.getElementById('naam-sectie').style.display = '';
+    document.getElementById('chat-sectie').style.display = 'none';
+    clearInterval(pollingInterval);
+  }
+
+  function toonChat() {
+    document.getElementById('naam-sectie').style.display = 'none';
+    document.getElementById('chat-sectie').style.display = '';
+    document.getElementById('huidige-naam').textContent = naam;
+    document.getElementById('naam-input').value = naam;
+    laadBerichten();
+    pollingInterval = setInterval(laadBerichten, 2000);
+  }
+
+  function getBerichten() {
+    try {
+      return JSON.parse(localStorage.getItem(OPSLAG_BERICHTEN_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function slaBerichtenOp(berichten) {
+    localStorage.setItem(OPSLAG_BERICHTEN_KEY, JSON.stringify(berichten));
+  }
+
+  function laadBerichten() {
+    const berichten = getBerichten();
+    const div = document.getElementById('berichten');
+    const wasOnderaan = div.scrollTop + div.clientHeight >= div.scrollHeight - 5;
+
+    div.innerHTML = '';
+    for (const b of berichten) {
+      const regel = document.createElement('div');
+      regel.textContent = `[${b.tijd}] ${b.naam}: ${b.tekst}`;
+      div.appendChild(regel);
+    }
+
+    if (wasOnderaan) div.scrollTop = div.scrollHeight;
+  }
+
+  function stuurBericht() {
+    const input = document.getElementById('bericht-input');
+    const tekst = input.value.trim();
+    if (!tekst) return;
+
+    const berichten = getBerichten();
+    const nu = new Date();
+    const tijd = nu.getHours().toString().padStart(2,'0') + ':' + nu.getMinutes().toString().padStart(2,'0');
+
+    berichten.push({ naam, tekst, tijd });
+
+    // Bewaar max 200 berichten
+    if (berichten.length > 200) berichten.splice(0, berichten.length - 200);
+
+    slaBerichtenOp(berichten);
+    input.value = '';
+    laadBerichten();
+  }
+
+  init();
+</script>
+
+</body>
+</html>
