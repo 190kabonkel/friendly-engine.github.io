@@ -37,23 +37,65 @@
 </div>
 
 <script>
+const SUPABASE_URL = 'https://etpdeqsdkrinzrgmgcum.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0cGRlcXNka3JpbnpyZ21nY3VtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA3NTE2NjYsImV4cCI6MjA5NjMyNzY2Nn0.bAEjm4cKkxfgMbDUeItMVjnmbZDaBM9CmKt9SX98j8Y';
+
 const BANNED_WORDS = [
-  // politiek
   "politiek","verkiezing","partij","pvv","vvd","d66","cda","sp ","pvda","groenlinks","bbk","nsc","premier","minister","kabinet","kamerlid","tweede kamer","eerste kamer","amsterdam","democraat","socialist","liberaal","fascist","communist","trump","biden","rutte","wilders","timmermans","propaganda","campagne",
-  // LGBTQ+
   "lgbtq","lgbt","homo","lesbi","biseksueel","transgender","trans ","nonbinair","queer","gay","lesbo","travestiet","pride",
-  // abortus
   "abortus","zwangerschapsafbreking",
-  // religie
   "allah","jezus","christus","bijbel","koran","thora","moslim","christen","katholiek","protestant","islam","jodendom","boeddhisme","hindoe","atheisme","geloof","gebed","kerk","moskee","synagoge",
-  // scheldwoorden / vloeken
-  "fuck","shit","kut","klootzak","godverdomme","godver","tering","kanker","tyfus","cholera","lul","pik","kak","bitch","asshole","motherfucker","hoer","slet","eikel","mongool","debiel","idioot","stomme","neuken","naaien","kontje","kontje","reet","poep",
-  // controversieel
+  "fuck","shit","kut","klootzak","godverdomme","godver","tering","kanker","tyfus","cholera","lul","pik","kak","bitch","asshole","motherfucker","hoer","slet","eikel","mongool","debiel","idioot","stomme","neuken","naaien","reet","poep",
   "racist","racisme","nazi","hitler","antisemiet","jihad","terrorist","haatmisdrijf"
 ];
 
 let userName = localStorage.getItem("chatroom_name") || "";
+let lastMessageId = 0;
 
+// ── Supabase helper ──────────────────────────────────────────
+async function apiFetch(path, options = {}) {
+  const res = await fetch(SUPABASE_URL + path, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...(options.headers || {})
+    }
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ── Load messages from Supabase ──────────────────────────────
+async function loadMessages() {
+  try {
+    const data = await apiFetch('/rest/v1/comments?order=created_at.asc');
+    const box = document.getElementById('chat-box');
+    box.innerHTML = '';
+    lastMessageId = 0;
+    data.forEach(msg => {
+      appendMessage(msg);
+      if (msg.id > lastMessageId) lastMessageId = msg.id;
+    });
+  } catch (e) {
+    console.error('Failed to load messages:', e);
+  }
+}
+
+// ── Append a single message to the chat box ──────────────────
+function appendMessage(msg) {
+  const box = document.getElementById('chat-box');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  const time = new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  div.innerHTML = `<span class="name">[${time}] ${escapeHtml(msg.username)}:</span> ${escapeHtml(msg.text)}`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── Name setup ───────────────────────────────────────────────
 function updateNameDisplay() {
   const el = document.getElementById("current-name");
   if (userName) {
@@ -71,50 +113,103 @@ function setName() {
   userName = input;
   localStorage.setItem("chatroom_name", userName);
   updateNameDisplay();
-  addMessage("systeem", `Naam ingesteld op: ${userName}`, "system");
+  addSystemMessage(`Naam ingesteld op: ${userName}`);
 }
 
+// ── Send message ─────────────────────────────────────────────
+async function sendMsg() {
+  if (!userName) { alert("Stel eerst een naam in."); return; }
+  const input = document.getElementById("msg-input");
+  const text = input.value.trim();
+  if (!text) return;
+  if (containsBannedWord(text)) {
+    addBlockedMessage("⚠️ Jouw bericht bevat een verboden woord en is geblokkeerd.");
+    input.value = "";
+    return;
+  }
+  input.value = "";
+  try {
+    await apiFetch('/rest/v1/comments', {
+      method: 'POST',
+      body: JSON.stringify({ username: userName, text: text, likes: 0 })
+    });
+    // real-time will pick it up
+  } catch (e) {
+    console.error('Failed to send message:', e);
+  }
+}
+
+// ── Local system/blocked messages ───────────────────────────
+function addSystemMessage(text) {
+  const box = document.getElementById("chat-box");
+  const div = document.createElement("div");
+  div.className = "msg system";
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
+  div.textContent = `[${time}] ${text}`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function addBlockedMessage(text) {
+  const box = document.getElementById("chat-box");
+  const div = document.createElement("div");
+  div.className = "msg blocked";
+  div.textContent = text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── Helpers ──────────────────────────────────────────────────
 function containsBannedWord(text) {
   const lower = text.toLowerCase();
   return BANNED_WORDS.some(w => lower.includes(w));
-}
-
-function addMessage(name, text, type = "") {
-  const box = document.getElementById("chat-box");
-  const div = document.createElement("div");
-  div.className = "msg " + type;
-  const now = new Date();
-  const time = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
-  if (type === "system") {
-    div.textContent = `[${time}] ${text}`;
-  } else {
-    div.innerHTML = `<span class="name">[${time}] ${name}:</span> ${escapeHtml(text)}`;
-  }
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
 }
 
 function escapeHtml(str) {
   return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
-function sendMsg() {
-  if (!userName) { alert("Stel eerst een naam in."); return; }
-  const input = document.getElementById("msg-input");
-  const text = input.value.trim();
-  if (!text) return;
-  if (containsBannedWord(text)) {
-    addMessage("", "⚠️ Jouw bericht bevat een verboden woord en is geblokkeerd.", "blocked");
-    input.value = "";
-    return;
-  }
-  addMessage(userName, text);
-  input.value = "";
+// ── Real-time via WebSocket ──────────────────────────────────
+function startRealtime() {
+  const wsUrl = 'wss://etpdeqsdkrinzrgmgcum.supabase.co/realtime/v1/websocket'
+    + '?apikey=' + SUPABASE_KEY + '&vsn=1.0.0';
+
+  const socket = new WebSocket(wsUrl);
+
+  socket.addEventListener('open', () => {
+    socket.send(JSON.stringify({
+      topic: 'realtime:public:comments',
+      event: 'phx_join',
+      payload: {},
+      ref: '1'
+    }));
+  });
+
+  socket.addEventListener('message', (event) => {
+    const msg = JSON.parse(event.data);
+    if (
+      msg.topic === 'realtime:public:comments' &&
+      msg.event === 'INSERT'
+    ) {
+      const newMsg = msg.payload.record;
+      if (newMsg && newMsg.id > lastMessageId) {
+        lastMessageId = newMsg.id;
+        appendMessage(newMsg);
+      }
+    }
+  });
+
+  socket.addEventListener('close', () => {
+    setTimeout(startRealtime, 3000);
+  });
 }
 
-// Init
+// ── Init ─────────────────────────────────────────────────────
 updateNameDisplay();
-addMessage("systeem", "Welkom in de chatroom! Stel je naam in om te beginnen.", "system");
+loadMessages();
+startRealtime();
+addSystemMessage("Welkom in de chatroom! Stel je naam in om te beginnen.");
 </script>
 </body>
 </html>
