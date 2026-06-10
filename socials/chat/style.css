@@ -1,0 +1,176 @@
+/* ============================================================
+   CHATROOM - STYLE.CSS
+   Pas hier alles aan. chatroom.html blijft ongewijzigd.
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   PAGINA / BODY
+   ------------------------------------------------------------ */
+body {
+  font-family: sans-serif;   /* Lettertype van de hele pagina */
+  margin: 20px;              /* Ruimte rondom de pagina */
+  background-color: #ffffff; /* Achtergrondkleur van de pagina */
+  color: #000000;            /* Standaard tekstkleur */
+}
+
+
+/* ------------------------------------------------------------
+   PAGINATITEL  <h2>Chatroom</h2>
+   ------------------------------------------------------------ */
+h2 {
+  font-size: 24px;           /* Grootte van de titel */
+  font-weight: bold;         /* Dikte: bold / normal */
+  margin-bottom: 15px;       /* Ruimte onder de titel */
+  color: #000000;            /* Kleur van de titel */
+}
+
+
+/* ------------------------------------------------------------
+   NAAM-BALK  (bovenste balk met naam invoer)
+   ------------------------------------------------------------ */
+#name-area {
+  display: flex;             /* Elementen naast elkaar */
+  gap: 5px;                  /* Ruimte tussen de elementen */
+  align-items: center;       /* Verticaal gecentreerd */
+  margin-bottom: 10px;       /* Ruimte onder de balk */
+}
+
+/* Label "Jouw naam:" */
+#name-area label {
+  font-size: 14px;           /* Tekstgrootte van het label */
+  color: #000000;            /* Kleur van het label */
+}
+
+/* Invoerveld voor de naam */
+#name-input {
+  padding: 6px;              /* Ruimte binnenin het veld */
+  border: 1px solid #cccccc; /* Rand: dikte / stijl / kleur */
+  border-radius: 0px;        /* Afgeronde hoeken (0 = recht) */
+  font-size: 14px;           /* Tekstgrootte */
+  background-color: #ffffff; /* Achtergrond van het veld */
+  color: #000000;            /* Tekstkleur */
+  width: 150px;              /* Breedte van het veld */
+}
+
+/* Tekst die verschijnt als het veld leeg is */
+#name-input::placeholder {
+  color: #aaaaaa;            /* Kleur van de placeholder tekst */
+}
+
+/* "Ingelogd als: ..." tekst naast de knop */
+#current-name {
+  font-weight: bold;         /* Dikgedrukt */
+  font-size: 14px;           /* Tekstgrootte */
+  color: #000000;            /* Tekstkleur */
+}
+
+
+/* ------------------------------------------------------------
+   CHATVENSTER  (het vak waar berichten in staan)
+   ------------------------------------------------------------ */
+#chat-box {
+  width: 100%;               /* Breedte: 100% van de pagina */
+  height: 400px;             /* Hoogte van het chatvenster */
+  border: 1px solid #cccccc; /* Rand: dikte / stijl / kleur */
+  border-radius: 0px;        /* Afgeronde hoeken */
+  overflow-y: auto;          /* Scrollbaar als berichten te veel zijn */
+  padding: 10px;             /* Ruimte binnenin het venster */
+  box-sizing: border-box;    /* Padding meegeteld in de breedte */
+  background-color: #fafafa; /* Achtergrondkleur van het chatvenster */
+}
+
+
+/* ------------------------------------------------------------
+   BERICHTEN  (elk los bericht in de chat)
+   ------------------------------------------------------------ */
+.msg {
+  margin: 5px 0;             /* Ruimte boven en onder elk bericht */
+  font-size: 14px;           /* Tekstgrootte van berichten */
+  line-height: 1.4;          /* Regelafstand */
+  color: #000000;            /* Standaard tekstkleur */
+}
+
+/* Naam van de afzender  "[12:34] Joel:" */
+.msg .name {
+  font-weight: bold;         /* Dikgedrukt */
+  color: #000000;            /* Kleur van de naam */
+}
+
+/* Systeemberichten  (bijv. "Welkom in de chatroom!") */
+.msg.system {
+  color: #888888;            /* Kleur van systeemberichten */
+  font-style: italic;        /* Cursief */
+  font-size: 13px;           /* Iets kleiner dan normale berichten */
+}
+
+/* Geblokkeerde berichten  (verboden woord gedetecteerd) */
+.msg.blocked {
+  color: #cc0000;            /* Kleur van de foutmelding */
+  font-style: italic;        /* Cursief */
+  font-size: 13px;           /* Tekstgrootte */
+}
+
+
+/* ------------------------------------------------------------
+   STATUSBALK  ("Verbonden ✓" / foutmelding)
+   ------------------------------------------------------------ */
+#status {
+  font-size: 12px;           /* Kleine tekst */
+  color: #888888;            /* Kleur van de statustekst */
+  margin-top: 5px;           /* Ruimte boven de statusbalk */
+  margin-bottom: 0px;        /* Ruimte onder de statusbalk */
+}
+
+
+/* ------------------------------------------------------------
+   INVOERBALK ONDERAAN  (berichtenveld + verstuurknop)
+   ------------------------------------------------------------ */
+#input-area {
+  display: flex;             /* Elementen naast elkaar */
+  gap: 5px;                  /* Ruimte tussen invoerveld en knop */
+  margin-top: 10px;          /* Ruimte boven de invoerbalk */
+}
+
+/* Berichtinvoerveld */
+#msg-input {
+  flex: 1;                   /* Neemt alle beschikbare breedte in */
+  padding: 6px;              /* Ruimte binnenin het veld */
+  border: 1px solid #cccccc; /* Rand: dikte / stijl / kleur */
+  border-radius: 0px;        /* Afgeronde hoeken */
+  font-size: 14px;           /* Tekstgrootte */
+  background-color: #ffffff; /* Achtergrondkleur */
+  color: #000000;            /* Tekstkleur */
+}
+
+/* Placeholder tekst in het berichtenveld */
+#msg-input::placeholder {
+  color: #aaaaaa;            /* Kleur van de placeholder */
+}
+
+
+/* ------------------------------------------------------------
+   KNOPPEN  (Opslaan + Verstuur)
+   ------------------------------------------------------------ */
+button {
+  padding: 6px 12px;         /* Ruimte binnenin: boven/onder  links/rechts */
+  cursor: pointer;           /* Muiscursor verandert bij hoveren */
+  font-size: 14px;           /* Tekstgrootte */
+  font-weight: normal;       /* Dikgedrukt: bold / normal */
+  border: 1px solid #cccccc; /* Rand van de knop */
+  border-radius: 0px;        /* Afgeronde hoeken */
+  background-color: #eeeeee; /* Achtergrondkleur van de knop */
+  color: #000000;            /* Tekstkleur van de knop */
+}
+
+/* Knop als je er met de muis overheen gaat */
+button:hover {
+  background-color: #dddddd; /* Achtergrond bij hover */
+  color: #000000;            /* Tekstkleur bij hover */
+  border-color: #aaaaaa;     /* Randkleur bij hover */
+}
+
+/* Knop als je hem ingedrukt houdt */
+button:active {
+  background-color: #cccccc; /* Achtergrond bij indrukken */
+}

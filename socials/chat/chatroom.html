@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Chatroom</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Chatroom</h2>
+
+<div id="name-area">
+  <label>Jouw naam:</label>
+  <input id="name-input" type="text" placeholder="Voer naam in..." maxlength="30">
+  <button onclick="setName()">Opslaan</button>
+  <span id="current-name"></span>
+</div>
+
+<div id="chat-box"></div>
+<div id="status">Verbinden...</div>
+
+<div id="input-area">
+  <input id="msg-input" type="text" placeholder="Typ een bericht..." maxlength="500" onkeydown="if(event.key==='Enter')sendMsg()">
+  <button onclick="sendMsg()">Verstuur</button>
+</div>
+
+<script>
+const SERVER = "http://localhost:3000";
+
+const BANNED_WORDS = [
+  "politiek","verkiezing","partij","pvv","vvd","d66","cda","pvda","groenlinks","premier","minister","kabinet","kamerlid","propaganda","campagne",
+  "lgbtq","lgbt","homo","lesbi","biseksueel","transgender","nonbinair","queer","gay","lesbo","pride",
+  "abortus","zwangerschapsafbreking",
+  "allah","jezus","christus","bijbel","koran","thora","moslim","christen","katholiek","protestant","islam","jodendom","boeddhisme","hindoe","geloof","gebed","kerk","moskee","synagoge",
+  "fuck","shit","kut","klootzak","godverdomme","godver","tering","kanker","tyfus","cholera","lul","pik","bitch","hoer","slet","eikel","mongool","debiel","neuken","naaien","reet",
+  "racist","racisme","nazi","hitler","antisemiet","jihad","terrorist"
+];
+
+let userName = localStorage.getItem("chatroom_name") || "";
+let lastMessageId = 0;
+
+function updateNameDisplay() {
+  const el = document.getElementById("current-name");
+  if (userName) {
+    el.textContent = "Ingelogd als: " + userName;
+    document.getElementById("name-input").value = userName;
+  } else {
+    el.textContent = "Geen naam ingesteld";
+  }
+}
+
+function setName() {
+  const input = document.getElementById("name-input").value.trim();
+  if (!input) { alert("Voer een naam in."); return; }
+  if (containsBannedWord(input)) { alert("Je naam bevat een verboden woord."); return; }
+  userName = input;
+  localStorage.setItem("chatroom_name", userName);
+  updateNameDisplay();
+}
+
+function containsBannedWord(text) {
+  const lower = text.toLowerCase();
+  return BANNED_WORDS.some(w => lower.includes(w));
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function addMessageToBox(msg, isSystem = false) {
+  const box = document.getElementById("chat-box");
+  const div = document.createElement("div");
+  div.className = "msg" + (isSystem ? " system" : "");
+  if (isSystem) {
+    div.textContent = msg;
+  } else {
+    div.innerHTML = `<span class="name">[${msg.time}] ${escapeHtml(msg.name)}:</span> ${escapeHtml(msg.text)}`;
+  }
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function fetchMessages() {
+  try {
+    const res = await fetch(`${SERVER}/messages`);
+    const msgs = await res.json();
+
+    // Eerste keer: laad alles
+    if (lastMessageId === 0) {
+      const box = document.getElementById("chat-box");
+      box.innerHTML = "";
+      msgs.forEach(m => addMessageToBox(m));
+    } else {
+      // Daarna: alleen nieuwe
+      const nieuw = msgs.filter(m => m.id > lastMessageId);
+      nieuw.forEach(m => addMessageToBox(m));
+    }
+
+    if (msgs.length > 0) {
+      lastMessageId = msgs[msgs.length - 1].id;
+    }
+
+    document.getElementById("status").textContent = "Verbonden ✓";
+  } catch (e) {
+    document.getElementById("status").textContent = "⚠️ Geen verbinding met server. Start server.js!";
+  }
+}
+
+async function sendMsg() {
+  if (!userName) { alert("Stel eerst een naam in."); return; }
+  const input = document.getElementById("msg-input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (containsBannedWord(text)) {
+    const box = document.getElementById("chat-box");
+    const div = document.createElement("div");
+    div.className = "msg blocked";
+    div.textContent = "⚠️ Bericht geblokkeerd: verboden woord.";
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    input.value = "";
+    return;
+  }
+
+  input.value = "";
+
+  try {
+    await fetch(`${SERVER}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: userName, text })
+    });
+    fetchMessages();
+  } catch (e) {
+    document.getElementById("status").textContent = "⚠️ Kon bericht niet versturen.";
+  }
+}
+
+// Init
+updateNameDisplay();
+fetchMessages();
+
+// Poll elke 2 seconden voor nieuwe berichten
+setInterval(fetchMessages, 2000);
+</script>
+</body>
+</html>
