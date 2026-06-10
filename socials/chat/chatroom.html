@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Chatroom</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Chatroom</h2>
+
+<div id="name-area">
+  <label>Jouw naam:</label>
+  <input id="name-input" type="text" placeholder="Voer naam in..." maxlength="30">
+  <button onclick="setName()">Opslaan</button>
+  <span id="current-name"></span>
+</div>
+
+<div id="chat-box"></div>
+<div id="status">Verbinden...</div>
+
+<div id="input-area">
+  <input id="msg-input" type="text" placeholder="Typ een bericht..." maxlength="500" onkeydown="if(event.key==='Enter')sendMsg()">
+  <button onclick="sendMsg()">Verstuur</button>
+</div>
+
+<script>
+const BANNED_WORDS = [
+  "politiek","verkiezing","partij","pvv","vvd","d66","cda","pvda","groenlinks","premier","minister","kabinet","kamerlid","propaganda","campagne",
+  "lgbtq","lgbt","homo","lesbi","biseksueel","transgender","nonbinair","queer","gay","lesbo","pride",
+  "abortus","zwangerschapsafbreking",
+  "allah","jezus","christus","bijbel","koran","thora","moslim","christen","katholiek","protestant","islam","jodendom","boeddhisme","hindoe","geloof","gebed","kerk","moskee","synagoge",
+  "fuck","shit","kut","klootzak","godverdomme","godver","tering","kanker","tyfus","cholera","lul","pik","bitch","hoer","slet","eikel","mongool","debiel","neuken","naaien","reet",
+  "racist","racisme","nazi","hitler","antisemiet","jihad","terrorist"
+];
+
+let userName = localStorage.getItem("chatroom_name") || "";
+
+function readMessages() {
+  try { return JSON.parse(localStorage.getItem("chatroom_messages") || "[]"); }
+  catch { return []; }
+}
+
+function saveMessages(msgs) {
+  // Bewaar max 500 berichten
+  if (msgs.length > 500) msgs.splice(0, msgs.length - 500);
+  localStorage.setItem("chatroom_messages", JSON.stringify(msgs));
+}
+
+function updateNameDisplay() {
+  const el = document.getElementById("current-name");
+  if (userName) {
+    el.textContent = "Ingelogd als: " + userName;
+    document.getElementById("name-input").value = userName;
+  } else {
+    el.textContent = "Geen naam ingesteld";
+  }
+}
+
+function setName() {
+  const input = document.getElementById("name-input").value.trim();
+  if (!input) { alert("Voer een naam in."); return; }
+  if (containsBannedWord(input)) { alert("Je naam bevat een verboden woord."); return; }
+  userName = input;
+  localStorage.setItem("chatroom_name", userName);
+  updateNameDisplay();
+}
+
+function containsBannedWord(text) {
+  const lower = text.toLowerCase();
+  return BANNED_WORDS.some(w => lower.includes(w));
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function addMessageToBox(msg) {
+  const box = document.getElementById("chat-box");
+  const div = document.createElement("div");
+  div.className = "msg";
+  div.innerHTML = `<span class="name">[${msg.time}] ${escapeHtml(msg.name)}:</span> ${escapeHtml(msg.text)}`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function loadMessages() {
+  const box = document.getElementById("chat-box");
+  box.innerHTML = "";
+  readMessages().forEach(m => addMessageToBox(m));
+  document.getElementById("status").textContent = "Klaar ✓";
+}
+
+function sendMsg() {
+  if (!userName) { alert("Stel eerst een naam in."); return; }
+  const input = document.getElementById("msg-input");
+  const text = input.value.trim();
+  if (!text) return;
+
+  if (containsBannedWord(text)) {
+    const box = document.getElementById("chat-box");
+    const div = document.createElement("div");
+    div.className = "msg blocked";
+    div.textContent = "⚠️ Bericht geblokkeerd: verboden woord.";
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    input.value = "";
+    return;
+  }
+
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
+  const msg = { id: Date.now(), name: userName, text, time };
+
+  const msgs = readMessages();
+  msgs.push(msg);
+  saveMessages(msgs);
+  addMessageToBox(msg);
+  input.value = "";
+}
+
+// Init
+updateNameDisplay();
+loadMessages();
+</script>
+</body>
+</html>
