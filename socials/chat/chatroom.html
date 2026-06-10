@@ -25,8 +25,6 @@
 </div>
 
 <script>
-const SERVER = "http://localhost:3000";
-
 const BANNED_WORDS = [
   "politiek","verkiezing","partij","pvv","vvd","d66","cda","pvda","groenlinks","premier","minister","kabinet","kamerlid","propaganda","campagne",
   "lgbtq","lgbt","homo","lesbi","biseksueel","transgender","nonbinair","queer","gay","lesbo","pride",
@@ -37,7 +35,17 @@ const BANNED_WORDS = [
 ];
 
 let userName = localStorage.getItem("chatroom_name") || "";
-let lastMessageId = 0;
+
+function readMessages() {
+  try { return JSON.parse(localStorage.getItem("chatroom_messages") || "[]"); }
+  catch { return []; }
+}
+
+function saveMessages(msgs) {
+  // Bewaar max 500 berichten
+  if (msgs.length > 500) msgs.splice(0, msgs.length - 500);
+  localStorage.setItem("chatroom_messages", JSON.stringify(msgs));
+}
 
 function updateNameDisplay() {
   const el = document.getElementById("current-name");
@@ -67,46 +75,23 @@ function escapeHtml(str) {
   return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
-function addMessageToBox(msg, isSystem = false) {
+function addMessageToBox(msg) {
   const box = document.getElementById("chat-box");
   const div = document.createElement("div");
-  div.className = "msg" + (isSystem ? " system" : "");
-  if (isSystem) {
-    div.textContent = msg;
-  } else {
-    div.innerHTML = `<span class="name">[${msg.time}] ${escapeHtml(msg.name)}:</span> ${escapeHtml(msg.text)}`;
-  }
+  div.className = "msg";
+  div.innerHTML = `<span class="name">[${msg.time}] ${escapeHtml(msg.name)}:</span> ${escapeHtml(msg.text)}`;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
 
-async function fetchMessages() {
-  try {
-    const res = await fetch(`${SERVER}/messages`);
-    const msgs = await res.json();
-
-    // Eerste keer: laad alles
-    if (lastMessageId === 0) {
-      const box = document.getElementById("chat-box");
-      box.innerHTML = "";
-      msgs.forEach(m => addMessageToBox(m));
-    } else {
-      // Daarna: alleen nieuwe
-      const nieuw = msgs.filter(m => m.id > lastMessageId);
-      nieuw.forEach(m => addMessageToBox(m));
-    }
-
-    if (msgs.length > 0) {
-      lastMessageId = msgs[msgs.length - 1].id;
-    }
-
-    document.getElementById("status").textContent = "Verbonden ✓";
-  } catch (e) {
-    document.getElementById("status").textContent = "⚠️ Geen verbinding met server. Start server.js!";
-  }
+function loadMessages() {
+  const box = document.getElementById("chat-box");
+  box.innerHTML = "";
+  readMessages().forEach(m => addMessageToBox(m));
+  document.getElementById("status").textContent = "Klaar ✓";
 }
 
-async function sendMsg() {
+function sendMsg() {
   if (!userName) { alert("Stel eerst een naam in."); return; }
   const input = document.getElementById("msg-input");
   const text = input.value.trim();
@@ -123,26 +108,20 @@ async function sendMsg() {
     return;
   }
 
-  input.value = "";
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,"0") + ":" + now.getMinutes().toString().padStart(2,"0");
+  const msg = { id: Date.now(), name: userName, text, time };
 
-  try {
-    await fetch(`${SERVER}/messages`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: userName, text })
-    });
-    fetchMessages();
-  } catch (e) {
-    document.getElementById("status").textContent = "⚠️ Kon bericht niet versturen.";
-  }
+  const msgs = readMessages();
+  msgs.push(msg);
+  saveMessages(msgs);
+  addMessageToBox(msg);
+  input.value = "";
 }
 
 // Init
 updateNameDisplay();
-fetchMessages();
-
-// Poll elke 2 seconden voor nieuwe berichten
-setInterval(fetchMessages, 2000);
+loadMessages();
 </script>
 </body>
 </html>
