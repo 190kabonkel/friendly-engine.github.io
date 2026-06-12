@@ -1,0 +1,35 @@
+    .box {
+    border:none;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 0 25px black;
+    color : rgb(255, 255, 255);
+    background-color: #095492;
+    text-align: center;
+    font-family: 'Trebuchet MS', monospace;
+    position: relative;
+    left: 50px;
+    top: 10px;
+    width: 250px;
+    height: 400px;
+}
+  .link.button {
+    background-color: rgb(96, 255, 75);
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 12px; 
+    box-shadow: 0 0 25px black;
+}
+body {
+    background-color: #074170;
+}
+h1 {
+    font-family: 'Trebuchet MS', monospace;
+    color: white;
+}
